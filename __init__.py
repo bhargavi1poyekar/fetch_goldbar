@@ -1,0 +1,1 @@
+from .goldbar import GoldBarWeighing
