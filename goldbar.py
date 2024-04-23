@@ -5,37 +5,20 @@ from selenium.common.exceptions import NoSuchElementException, TimeoutException
 from typing import List
 from selenium.webdriver.chrome.options import Options
 import logging
-import json
+from web_driver_utilities import WebDriverUtility
+from logger import setup_logger
 
-with open("config.json", "r") as config_file:
-    config = json.load(config_file)
-
-
-# Define Log to store the errors
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s',
-    filename="goldbar.log",
-    filemode='a'
-    )
 
 
 class GoldBarWeighing:
 
-    def __init__(self) -> None:
+    def __init__(self, driver) -> None:
         """
         Initializes the Chromedriver
         """
-        if config["isheadless"] == 1:
-            options = Options()
-            options.add_argument("--headless")
-            options.add_argument("--no-sandbox")
-            options.add_argument("--disable-dev-shm-usage")
-            self.driver = webdriver.Chrome(options)
-        else:
-            self.driver = webdriver.Chrome()
-        url = config["url"]
-        self.driver.get(url)
+        self.driver = driver
+        self.webutils = WebDriverUtility(driver)
+        self.logger = setup_logger()
     
     def __enter__(self):
         return self
@@ -50,7 +33,7 @@ class GoldBarWeighing:
         """
         Resets the bowl grids
         """
-        self.driver.find_element(By.CSS_SELECTOR, "button#reset.button:not([disabled])").click()
+        self.webutils.click_button_by_css("button#reset.button:not([disabled])")
 
     def enter_bars_on_bowl(self, bars: List[int], bowl_side: str) -> None:
         """
@@ -64,15 +47,13 @@ class GoldBarWeighing:
         for i, bar in enumerate(bars):
             try:
                 # Set the bowl grids values as given argument
-                self.driver.find_element(By.ID, f"{bowl_side}_{i}").send_keys(str(bar))
+                # self.driver.find_element(By.ID,).send_keys(str(bar))
+                self.webutils.set_text( f"{bowl_side}_{i}", str(bar))
             except NoSuchElementException:
-                logging.error(f"Element {bowl_side}_{i} not found.")
-                raise
-            except ValueError:
-                logging.error(f"Invalid bar number")
+                self.logger.error(f"Element {bowl_side}_{i} not found.")
                 raise
             except Exception as e:
-                logging.error(f"Some error occurred. {e}")
+                self.logger.error(f"Some error occurred. {e}")
     
 
     def weigh(self, bars_left: List[int], bars_right: List[int]) -> str:
@@ -93,28 +74,27 @@ class GoldBarWeighing:
 
         try:
             # Click the weigh button, to compare the weights on both side
-            self.driver.find_element(By.ID, "weigh").click()
+            # self.driver.find_element(By.ID, "weigh").click()
+            self.webutils.click_button_by_id("weigh")
 
             # Wait for the 'reset' (result) to be enabled with the result text
-            WebDriverWait(self.driver, 10).until(
-                lambda driver: driver.find_element(By.ID, "reset").text in ["<", ">", "="]
-            )
+            self.webutils.wait_for_element('reset', ['<', '>','='])
 
             # Get the text of the element with id = 'reset'
-            result = self.driver.find_element(By.ID, "reset").text
+            result = self.webutils.get_text("reset")
             self.reset()  # Reset the bowls
             return result
 
         # If WebDriverWait times out
         except TimeoutException:
-            logging.error(f"Weighing operation timed out or the result element did not "
+            self.logger.error(f"Weighing operation timed out or the result element did not "
                           f"contain the expected value.")
             raise
         except NoSuchElementException:
-            logging.error(f"Requested Element not found.")
+            self.logger.error(f"Requested Element not found.")
             raise
         except Exception as e:
-            logging.error(f"Some Error occurred. {e}")
+            self.logger.error(f"Some Error occurred. {e}")
             raise
 
     @staticmethod
@@ -145,9 +125,8 @@ class GoldBarWeighing:
                 raise ValueError("Unexpected Result")
             return possible_fake
         except Exception as e:
-            logging.error(f"Some Error occurred: {e}")
+            self.logger.error(f"Some Error occurred: {e}")
             raise
-
 
     def valid_bar_values(self, left_bars: List[int], right_bars: List[int], remaining: List[int]) -> bool:
 
@@ -166,26 +145,28 @@ class GoldBarWeighing:
 
         if len(left_bars)!=3 or len(right_bars)!=3 or len(remaining)!=3:
             return False
+        
         all_bars = left_bars + right_bars + remaining
         if len(set(all_bars)) == 9 and all(0 <= bar <= 8 for bar in all_bars):
             return True
         return False
 
 
-    def find_fake_bar(self) -> int:
+    def find_fake_bar(self, left, right, remaining) -> int:
 
         """
         Find the fake bar by performing a series of weightings.
+
+        Args:
+        left (List[int]): Bars on the left side of the scale.
+        right (List[int]): Bars on the right side of the scale.
+        remaining (List[int]): Bars that will not be weighed.
 
         Returns:
         int: The index of the suspected fake bar.
         """
         
         try:
-            left = config["left_bar"]
-            right = config["right_bar"]
-            remaining = config["remaining"]
-
             if not self.valid_bar_values(left, right, remaining):
                 raise ValueError("The values in all the bars are not correct. " 
                 "Enter 3 unique values in each bar from 0-8")
@@ -205,7 +186,7 @@ class GoldBarWeighing:
 
             return fake_bar[0]
         except Exception as e:
-            logging.error(f"Some error occurred while finding the fake bar: {e}")
+            self.logger.error(f"Some error occurred while finding the fake bar: {e}")
             raise
 
     def validate_answer(self, fake_bar: int) -> bool:
@@ -222,14 +203,15 @@ class GoldBarWeighing:
 
         try:
             # Click the fake bar button
-            self.driver.find_element(By.ID, f"coin_{fake_bar}").click()
+            # self.driver.find_element(By.ID, f"coin_{fake_bar}").click()
+            self.webutils.click_button_by_id(f"coin_{fake_bar}")
 
             # Get th text in alert pop up
-            alert_text = self.driver.switch_to.alert.text
+            alert_text = self.webutils.get_alert_text()
             print(f"\nAlert: {alert_text}")
 
             # Accept the alert
-            self.driver.switch_to.alert.accept()
+            self.webutils.accept_alert()
 
             # Check if correct bar found
             found_bar = True 
@@ -237,10 +219,10 @@ class GoldBarWeighing:
                 found_bar = False
             return found_bar
         except NoSuchElementException:
-            logging.error(f"Failed to find the coin button for bar {fake_bar}.")
+            self.logger.error(f"Failed to find the coin button for bar {fake_bar}.")
             raise
         except Exception as e:
-            logging.error(f"Some error occurred :{e}")
+            self.logger.error(f"Some error occurred :{e}")
 
     def print_weighings_list(self) -> None:
         """
@@ -248,12 +230,12 @@ class GoldBarWeighing:
         """
         try:
             # Print the weightings performed
-            weighings_list = self.driver.find_elements(By.CSS_SELECTOR, "div.game-info ol li")
+            weighings_list = self.webutils.get_elements_by_css("div.game-info ol li")
             print("\nWeightings list: ")
             for item in weighings_list:
                 print(item.text)
         except NoSuchElementException:
-            logging.error("Failed to find weighing list elements")
+            self.logger.error("Failed to find weighing list elements")
             raise
         except Exception as e:
-            logging.error(f"Some error occurred :{e}")
+            self.logger.error(f"Some error occurred :{e}")
