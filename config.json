@@ -1,5 +1,5 @@
 {
-    "isheadless":0,  
+    "isheadless":1,  
     "url": "http://sdetchallenge.fetch.com/",
     "left_bar":[0, 1, 2],
     "right_bar":[3, 4, 5],
