@@ -5,6 +5,10 @@ from selenium.common.exceptions import NoSuchElementException, TimeoutException
 from typing import List
 from selenium.webdriver.chrome.options import Options
 import logging
+import json
+
+with open("config.json", "r") as config_file:
+    config = json.load(config_file)
 
 
 # Define Log to store the errors
@@ -22,12 +26,16 @@ class GoldBarWeighing:
         """
         Initializes the Chromedriver
         """
-        options = Options()
-        options.add_argument("--headless")
-        options.add_argument("--no-sandbox")
-        options.add_argument("--disable-dev-shm-usage")
-        self.driver = webdriver.Chrome(options)
-        self.driver.get("http://sdetchallenge.fetch.com/")
+        if config["isheadless"] == 1:
+            options = Options()
+            options.add_argument("--headless")
+            options.add_argument("--no-sandbox")
+            options.add_argument("--disable-dev-shm-usage")
+            self.driver = webdriver.Chrome(options)
+        else:
+            self.driver = webdriver.Chrome()
+        url = config["url"]
+        self.driver.get(url)
     
     def __enter__(self):
         return self
@@ -55,10 +63,6 @@ class GoldBarWeighing:
 
         for i, bar in enumerate(bars):
             try:
-                # Bar numbers are only from 0-8
-                if bar not in range(0, 9):
-                    raise ValueError("Input should be within range of 0 to 8")
-
                 # Set the bowl grids values as given argument
                 self.driver.find_element(By.ID, f"{bowl_side}_{i}").send_keys(str(bar))
             except NoSuchElementException:
@@ -69,6 +73,7 @@ class GoldBarWeighing:
                 raise
             except Exception as e:
                 logging.error(f"Some error occurred. {e}")
+    
 
     def weigh(self, bars_left: List[int], bars_right: List[int]) -> str:
         """
@@ -121,13 +126,13 @@ class GoldBarWeighing:
         Determine the possible fake bars that might be fake based on the weighing result.
 
         Args:
-        left (List[int]/int): Bars on the left side of the scale during the last weigh.
-        right (List[int]/int): Bars on the right side of the scale during the last weigh.
-        remaining (List[int]/int): Bars that have not been weighed.
+        left (List[int]): Bars on the left side of the scale during the last weigh.
+        right (List[int]): Bars on the right side of the scale during the last weigh.
+        remaining (List[int]): Bars that have not been weighed.
         result (str): The result of the last weigh, '<', '>', or '='.
 
         Returns:
-        List[int]/int: List of suspected fake bars.
+        List[int]: List of suspected fake bars.
         """
         try:
             if result == "<":
@@ -143,6 +148,30 @@ class GoldBarWeighing:
             logging.error(f"Some Error occurred: {e}")
             raise
 
+
+    def valid_bar_values(self, left_bars: List[int], right_bars: List[int], remaining: List[int]) -> bool:
+
+        """
+        Validates the values of the bars. Checks 3 conditions, length of all bars should be 3,
+        All the values should be unique and between the range 0-9
+
+        Args:
+        left (List[int]): Bars on the left side of the scale.
+        right (List[int]): Bars on the right side of the scale.
+        remaining (List[int]): Bars that will not be weighed.
+
+        Returns:
+        bool: Returns if the bar values are valid or not.
+        """
+
+        if len(left_bars)!=3 or len(right_bars)!=3 or len(remaining)!=3:
+            return False
+        all_bars = left_bars + right_bars + remaining
+        if len(set(all_bars)) == 9 and all(0 <= bar <= 8 for bar in all_bars):
+            return True
+        return False
+
+
     def find_fake_bar(self) -> int:
 
         """
@@ -153,9 +182,13 @@ class GoldBarWeighing:
         """
         
         try:
-            left = [0, 1, 2]
-            right = [3, 4, 5]
-            remaining = [6, 7, 8]
+            left = config["left_bar"]
+            right = config["right_bar"]
+            remaining = config["remaining"]
+
+            if not self.valid_bar_values(left, right, remaining):
+                raise ValueError("The values in all the bars are not correct. " 
+                "Enter 3 unique values in each bar from 0-8")
 
             # First weighing
             result = self.weigh(left, right)

@@ -40,18 +40,6 @@ def test_enter_bars_on_bowl_success(gold_bar_weighing):
         gold_bar_weighing.driver.find_element.return_value.send_keys.assert_any_call(str(i))
 
 
-def test_enter_bars_on_bowl_value_above_8(gold_bar_weighing):
-    """
-    Test that `enter_bars_on_bowl` raises a ValueError when bar indices
-    are out of the acceptable range.
-
-    Asserts:
-        A ValueError is raised for bar indices above the maximum allowed value.
-    """
-    with pytest.raises(ValueError):
-        gold_bar_weighing.enter_bars_on_bowl([9, 1, 2], 'left')
-
-
 def test_enter_bars_on_bowl_element_not_found(gold_bar_weighing):
     """
     Test that `enter_bars_on_bowl` raises a NoSuchElementException when an
