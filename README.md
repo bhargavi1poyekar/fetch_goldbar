@@ -1,4 +1,4 @@
-# Bhargavi Poyekar: Fetch Challenge : GoldBar Weighing
+# Bhargavi Poyekar: Fetch Challenge: GoldBar Weighing
 
 ## Table of Contents
 - [Game Problem Statement](#game-problem-statement)
@@ -37,7 +37,7 @@ You can only place gold bars on scale plates (bowls) and find which scale weighs
    - If weight(Group A) > weight(Group B):
      - The fake bar is in Group B. Proceed to Step 3 using Group B.
 
-3. Take the suspected group from Step 2 which contains three bars. Name them as Bar X, Bar Y, Bar Z.
+3. Take the suspected group from Step 2 which contains three bars. Name them as Bar X, Bar Y, and Bar Z.
 
 4. Weigh Bar X against Bar Y:
    - If weight(Bar X) == weight(Bar Y):
@@ -81,17 +81,17 @@ I assume that you have docker installed in your system.
 
     If you want to edit config.json:
 
-    First install nano inside the docker container
+    First, install nano inside the docker container
 
         apt install nano
 
-    Then Open the config.json in nano editor
+    Then Open the config.json in the nano editor
 
         nano config.json
 
-    Change the bar values. The Bar values should be unique in each bar. i.e. If you have entered 0, 1, 2 in left, then these bars will not be present in right and remaining. All the bar_lists should have a length of 3. And the value of bar should be between 0-8. 
+    Change the bar values. The Bar values should be unique in each bar. i.e. If you have entered 0, 1, 2 on the left, then these bars will not be present on the right and remaining. All the bar_lists should have a length of 3. The value of the bar should be between 0-8. 
 
-    If these conditions are not satisfies, the code will raise Value Error. 
+    If these conditions are not satisfied, the code will raise a Value Error. 
 
 7. Once configured, you can run the code using:
 
@@ -109,11 +109,11 @@ I assume that you have docker installed in your system.
 
         docker stop <container_id>
     
-    If you want to remove container
+    If you want to remove the container
 
         docker rm <container id>
     
-    If you want to display and delete image:
+    If you want to display and delete an image:
 
         docker images
         docker rmi <image_id>
@@ -121,10 +121,10 @@ I assume that you have docker installed in your system.
 
 ## Run without using docker. 
 
-If you don't have docker or not want to use docker. You can perform the following steps.
+If you don't have docker or do not want to use docker. You can perform the following steps.
 
 1. Install Google Chrome. 
-2. Download ChromeDriver release compatible with your google chrome. 
+2. Download ChromeDriver release compatible with your Google Chrome. 
 3. Unzip ChromDriver and move it into usr/local/bin
 3. Clone the repository and cd into the repository. 
 4. Install venv and create a virtual environment:
@@ -138,19 +138,19 @@ If you don't have docker or not want to use docker. You can perform the followin
 
         python3 main.py
 
-8. If your current running environment has gui, you can also see the test running by changing the config.json. 
+8. If your current running environment has GUI, you can also see the test running by changing the config.json. 
 
         In the config.json, change "isheadless" to 0.
 
-    Note:  This won't work in docker, as docker container doesn't have gui. 
+    Note:  This won't work in docker, as the docker container doesn't have GUI. 
 
 ## File Structure:
 
--main.py : Initializes object of GoldBarWeighing and calls the required functions. 
+-main.py: Initializes object of GoldBarWeighing and calls the required functions. 
 
--goldbar.py : Consist of class definition with the methods.
--goldbar.log : Stores the Error logs.
--testfiles : Unittest files
+-goldbar.py: Consists of class definition with the methods.
+-goldbar.log: Stores the Error logs.
+-testfiles: Unittest files
     - test_enter_bars_on_bowl.py
     - test_find_fake_bar.py
     - test_find_suspected_bars.py
@@ -169,7 +169,7 @@ GoldBarWeighing: This class manages the interaction with the balance scale web i
 
 Constructor
 __init__()
-Initializes an instance of GoldBarWeighing, setting up the Selenium WebDriver and navigating to the specified URL for the gold bar challenge.
+Initializes an instance of GoldBarWeighing, setting up the Selenium WebDriver, and navigating to the specified URL for the gold bar challenge.
 
 Context Management
 __enter__()
@@ -193,7 +193,7 @@ find_suspected_bars():
 Identifies the likely group containing the fake bar based on the result of a weigh-in. 
 
 valid_bar_value():
-Validates if the bar values satisfy the required conidtions. 
+Validates if the bar values satisfy the required conditions. 
 
 find_fake_bar():
 Starts the process to determine the fake gold bar using a minimum of weighings. 
@@ -206,8 +206,8 @@ Outputs the list of all weighings performed during the session, providing a trac
 
 ## Challenges:
 
-1. While trying to reset the bowl grids, I realized that the id of the reset button and result button is same. So I could not directly access it using By.ID, so I had to explore By.CSS_SELECTOR.
+1. While trying to reset the bowl grids, I realized that the ID of the reset button and the result button are the same. So I could not directly access it using By.ID, so I had to explore By.CSS_SELECTOR.
 
-2. While creating the docker file, it was difficult to setup the chromedriver. 
+2. While creating the docker file, it was difficult to set up the chrome driver. 
 
 Overall this was a great challenge where I could implement my skills and also learn new concepts. 
