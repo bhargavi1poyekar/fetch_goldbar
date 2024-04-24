@@ -202,5 +202,5 @@ Outputs the list of all weighings performed during the session, providing a trac
 1. While trying to reset the bowl grids, I realized that the ID of the reset button and the result button are the same. So I could not directly access it using By.ID, so I had to explore By.CSS_SELECTOR.
 
 2. While creating the docker file, it was difficult to set up the chrome driver.
-3. 
+
 Overall this was a great challenge where I could implement my skills and also learn new concepts. 
