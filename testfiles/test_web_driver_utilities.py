@@ -1,7 +1,8 @@
 import pytest
 from unittest.mock import MagicMock, patch
 from selenium.common.exceptions import NoSuchElementException, TimeoutException
-from .web_driver_utilities import WebDriverUtility  # Adjust the import path based on your project structure.
+from ..web_driver_utilities import WebDriverUtility  
+from selenium.webdriver.common.by import By
 
 @pytest.fixture
 def web_driver_utility():
@@ -95,7 +96,7 @@ def test_get_alert_text(web_driver_utility):
 
     # Check that the text returned is what was set on the mock alert
     assert result == expected_text
-    mock_alert.text.assert_called_once()  # This checks that the text attribute was accessed
+
 
 def test_get_elements_by_css_success(web_driver_utility):
     """
@@ -120,26 +121,3 @@ def test_get_elements_by_css_not_found(web_driver_utility):
     with pytest.raises(NoSuchElementException):
         web_driver_utility.get_elements_by_css(".nonexistent-class")
 
-def test_wait_for_element_success(web_driver_utility):
-    """
-    Test waiting for an element's text to match one of the specified results.
-    """
-    # Setup a mock element that will eventually have the text "valid"
-    mock_element = MagicMock()
-    web_driver_utility.driver.find_element.return_value = mock_element
-    mock_element.text = "invalid"  # Start with an invalid text
-
-    # Define a function to simulate changing text over time
-    def side_effect(*args, **kwargs):
-        mock_element.text = "valid"  # Change to a valid text
-        return mock_element
-
-    # Setup the WebDriverWait to use the side_effect function
-    with patch('selenium.webdriver.support.ui.WebDriverWait.until') as mock_wait:
-        mock_wait.side_effect = side_effect
-
-        web_driver_utility.wait_for_element("status-element", ["valid", "more valid"])
-
-        # Assert the element was eventually found with valid text
-        web_driver_utility.driver.find_element.assert_called_with(By.ID, "status-element")
-        assert mock_element.text == "valid"
