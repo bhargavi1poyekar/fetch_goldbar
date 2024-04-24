@@ -69,7 +69,7 @@ I assume that you have docker installed in your system.
 
         docker run -it --name mygoldbarapp goldbar-app
 
-    If you want to also run the unittests. 
+    If you want to also run the unit tests. 
 
         docker run -it --name mygoldbarapp goldbar-app bash
 
@@ -146,11 +146,14 @@ If you don't have docker or do not want to use docker. You can perform the follo
 
 ## File Structure:
 
--main.py: Initializes object of GoldBarWeighing and calls the required functions. 
-
--goldbar.py: Consists of class definition with the methods.
--goldbar.log: Stores the Error logs.
--testfiles: Unittest files
+-main.py: Initializes object of GoldBarWeighing and calls the required functions.
+-app:
+    - __init__.py
+    - goldbar.py: Defines the GoldBarWeighing Class
+    - web_driver_config.py: Defines Web Driver Class
+    - web_driver_utilities.py: Defines Web Driver utility class functions like click button, set text
+    - logger.py: Initializes logging
+-testfiles: Unit test files
     - test_enter_bars_on_bowl.py
     - test_find_fake_bar.py
     - test_find_suspected_bars.py
@@ -159,6 +162,7 @@ If you don't have docker or do not want to use docker. You can perform the follo
     - test_weigh.py
     - test_valid_bar_value.py
 -requirements.txt
+-config.json: Options for headless, bar values, and url. 
 
 
 ## Code Overview:
@@ -167,30 +171,19 @@ I have defined the GoldBarWeighing Class with all the required methods.
 
 GoldBarWeighing: This class manages the interaction with the balance scale web interface using Selenium WebDriver. It supports initializing a web session, conducting weighings, and determining the fake gold bar through systematic tests.
 
-Constructor
-__init__()
-Initializes an instance of GoldBarWeighing, setting up the Selenium WebDriver, and navigating to the specified URL for the gold bar challenge.
-
-Context Management
-__enter__()
-Supports usage with the with statement for better resource management. It returns the instance upon entering the context.
-
-__exit__():
-Ensures proper cleanup by quitting the WebDriver, thus closing the web browser session when exiting the context.
-
 Functional Methods:
 
 reset():
 Resets the balance scale by clicking the reset button on the webpage. 
 
 enter_bars_on_bowl():
-Places specified bars on either the left or right side of the scale. 
+Place specified bars on either the left or right side of the scale. 
 
 weigh():
 Conducts a weighing operation by placing the specified bars on the left and right sides of the scale and triggers the weighing process. It waits for the result and returns the outcome ('<', '>', '=') indicating which side is lighter or if both sides are balanced.
 
 find_suspected_bars():
-Identifies the likely group containing the fake bar based on the result of a weigh-in. 
+Identifies the likely group containing the fake bar based on the result of a weighing. 
 
 valid_bar_value():
 Validates if the bar values satisfy the required conditions. 
@@ -208,6 +201,6 @@ Outputs the list of all weighings performed during the session, providing a trac
 
 1. While trying to reset the bowl grids, I realized that the ID of the reset button and the result button are the same. So I could not directly access it using By.ID, so I had to explore By.CSS_SELECTOR.
 
-2. While creating the docker file, it was difficult to set up the chrome driver. 
-
+2. While creating the docker file, it was difficult to set up the chrome driver.
+3. 
 Overall this was a great challenge where I could implement my skills and also learn new concepts. 
