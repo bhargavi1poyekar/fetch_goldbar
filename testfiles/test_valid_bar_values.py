@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import patch
-from ..goldbar import GoldBarWeighing
+from ..app import GoldBarWeighing
 
 
 @pytest.fixture

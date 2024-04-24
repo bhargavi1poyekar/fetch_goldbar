@@ -1,8 +1,8 @@
 import pytest
 from selenium.common.exceptions import NoSuchElementException
 from unittest.mock import MagicMock, call, patch
-from ..goldbar import GoldBarWeighing
-from ..web_driver_utilities import WebDriverUtility
+from ..app import GoldBarWeighing
+from ..app import WebDriverUtility
 
 @pytest.fixture
 def gold_bar_weighing():

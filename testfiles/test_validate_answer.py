@@ -1,7 +1,7 @@
 import pytest
 from selenium.common.exceptions import NoSuchElementException, TimeoutException
 from unittest.mock import MagicMock, patch
-from ..goldbar import GoldBarWeighing
+from ..app import GoldBarWeighing
 
 
 @pytest.fixture

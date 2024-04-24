@@ -1,7 +1,7 @@
 import pytest
 from selenium.common.exceptions import NoSuchElementException, TimeoutException
 from unittest.mock import MagicMock, call, patch
-from ..goldbar import GoldBarWeighing
+from ..app import GoldBarWeighing
 from selenium.webdriver.common.by import By
 
 

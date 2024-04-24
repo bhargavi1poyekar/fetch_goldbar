@@ -1,7 +1,7 @@
 import pytest
 from unittest.mock import MagicMock, patch
 from selenium.common.exceptions import NoSuchElementException, TimeoutException
-from ..web_driver_utilities import WebDriverUtility  
+from ..app import WebDriverUtility  
 from selenium.webdriver.common.by import By
 
 

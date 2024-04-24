@@ -1,7 +1,7 @@
 import pytest
 from unittest.mock import MagicMock, patch
-from ..goldbar import GoldBarWeighing
-from ..web_driver_utilities import WebDriverUtility
+from ..app import GoldBarWeighing
+from ..app import WebDriverUtility
  
 
 left = [0, 1, 2]

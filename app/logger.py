@@ -7,7 +7,7 @@ def setup_logger():
     logging.basicConfig(
         level=logging.INFO,
         format='%(asctime)s - %(levelname)s - %(message)s',
-        filename="goldbar.log",
+        filename="./log/goldbar.log",
         filemode='a'
         )
     

@@ -1,8 +1,8 @@
 # main.py
 
-from goldbar import GoldBarWeighing
+from app.goldbar import GoldBarWeighing
 import json
-from web_driver_config import WebDriver
+from app.web_driver_config import WebDriver
 
 with open("config.json", "r") as config_file:
     config = json.load(config_file)
