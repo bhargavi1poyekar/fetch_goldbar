@@ -1,3 +1,5 @@
+# main.py
+
 from goldbar import GoldBarWeighing
 import json
 from web_driver_config import WebDriver

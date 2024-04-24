@@ -2,7 +2,6 @@ import pytest
 from selenium.common.exceptions import NoSuchElementException
 from unittest.mock import MagicMock, call, patch
 from ..goldbar import GoldBarWeighing
-from selenium.webdriver.common.by import By
 
 
 @pytest.fixture
@@ -12,14 +11,15 @@ def gold_bar_weighing():
     Returns:
        An instance of the GoldBarWeighing class equipped with a mocked WebDriver.
     """
-    with patch('selenium.webdriver.Chrome') as MockWebDriver:
+    with (patch('selenium.webdriver.Chrome') as MockWebDriver,
+          patch('..web_driver_utilities.WebDriverUtility') as MockWebDriverUtility):
         # mocker.patch()
-        gb = GoldBarWeighing()
-        gb.driver = MockWebDriver()
-        gb.weigh = MagicMock()
-        gb.find_suspected_bars = MagicMock()
-        gb.driver.find_element = MagicMock()
-        return GoldBarWeighing()
+        gb = GoldBarWeighing(MockWebDriver())
+        gb.webutils = MockWebDriverUtility()
+        gb.webutils = MockWebDriverUtility()
+        gb.webutils.set_text = MagicMock()
+        gb.webutils.click_button_by_id = MagicMock()
+        return gb
 
 
 def test_enter_bars_on_bowl_success(gold_bar_weighing):
@@ -30,12 +30,9 @@ def test_enter_bars_on_bowl_success(gold_bar_weighing):
     Asserts:
         The method correctly calls `find_element` and `send_keys` for each bar index.
     """
-    element_mock = MagicMock()
-    gold_bar_weighing.driver.find_element.return_value = element_mock
-    
     bars = [3, 4, 5]
     gold_bar_weighing.enter_bars_on_bowl(bars, 'left')
-    expected_calls = [call(By.ID, f"left_{i}") for i in range(len(bars))]
+    expected_calls = [call(f"left_{i}", str(bar)) for i, bar in enumerate(bars)]
     for i in bars:
         gold_bar_weighing.driver.find_element.return_value.send_keys.assert_any_call(str(i))
 
