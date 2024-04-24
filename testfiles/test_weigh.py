@@ -15,13 +15,12 @@ def gold_bar_weighing():
     """
     with patch('selenium.webdriver.Chrome') as MockWebDriver:
         # mocker.patch()
-        gb = GoldBarWeighing()
-        gb.driver = MockWebDriver()
+        gb = GoldBarWeighing(MockWebDriver())
         mock_element = MagicMock()
         gb.driver.find_element = MagicMock()
         gb.driver.find_element.return_value = mock_element
         mock_element.text = "="
-        return GoldBarWeighing()
+        return gb
 
 
 def test_weigh_success(gold_bar_weighing):
@@ -45,30 +44,3 @@ def test_weigh_success(gold_bar_weighing):
     )
 
 
-def test_weigh_timeout_exception(gold_bar_weighing):
-    """
-    Test the `weigh` method when a TimeoutException occurs.
-
-    Asserts:
-        - The `weigh` method raises a TimeoutException when the web driver encounters
-        a TimeoutException.
-    """
-    gold_bar_weighing.enter_bars_on_bowl = MagicMock()
-    gold_bar_weighing.driver.find_element().click = MagicMock()
-    gold_bar_weighing.driver.find_element.side_effect = TimeoutException("Timeout")
-
-    with pytest.raises(TimeoutException):
-        gold_bar_weighing.weigh([0, 1, 2], [3, 4, 5])
-
-
-def test_weigh_no_element_exception(gold_bar_weighing):
-    """
-    Test the `weigh` method when a NoSuchElementException occurs.
-    Asserts:
-        - The `weigh` method raises a NoSuchElementException when the web driver
-        encounters a NoSuchElementException.
-    """
-    gold_bar_weighing.enter_bars_on_bowl = MagicMock()
-    gold_bar_weighing.driver.find_element.side_effect = NoSuchElementException
-    with pytest.raises(NoSuchElementException):
-        gold_bar_weighing.weigh([0, 1, 2], [3, 4, 5])

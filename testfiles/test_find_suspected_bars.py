@@ -13,8 +13,7 @@ def gold_bar_weighing():
     """
     with patch('selenium.webdriver.Chrome') as MockWebDriver:
        
-        gb = GoldBarWeighing()
-        gb.driver = MockWebDriver()
+        gb = GoldBarWeighing(MockWebDriver())
         return gb
 
 

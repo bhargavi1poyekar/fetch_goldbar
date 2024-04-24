@@ -1,8 +1,8 @@
 # goldbar.py
 
 from typing import List
-from web_driver_utilities import WebDriverUtility
-from logger import setup_logger
+from .web_driver_utilities import WebDriverUtility
+from .logger import setup_logger
 
 
 class GoldBarWeighing:
