@@ -1,25 +1,18 @@
-from selenium import webdriver
-from selenium.webdriver.common.by import By 
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.common.exceptions import NoSuchElementException, TimeoutException
 from typing import List
-from selenium.webdriver.chrome.options import Options
-import logging
 from web_driver_utilities import WebDriverUtility
 from logger import setup_logger
-
 
 
 class GoldBarWeighing:
 
     def __init__(self, driver) -> None:
         """
-        Initializes the Chromedriver
+        Initializes the Chromedriver, WebDriver Object and Logger.
         """
         self.driver = driver
         self.webutils = WebDriverUtility(driver)
         self.logger = setup_logger()
-    
+
     def __enter__(self):
         return self
 
@@ -28,7 +21,7 @@ class GoldBarWeighing:
         Exits the chrome testing mode
         """
         self.driver.quit()
-    
+
     def reset(self):
         """
         Resets the bowl grids
@@ -47,14 +40,9 @@ class GoldBarWeighing:
         for i, bar in enumerate(bars):
             try:
                 # Set the bowl grids values as given argument
-                # self.driver.find_element(By.ID,).send_keys(str(bar))
-                self.webutils.set_text( f"{bowl_side}_{i}", str(bar))
-            except NoSuchElementException:
-                self.logger.error(f"Element {bowl_side}_{i} not found.")
-                raise
+                self.webutils.set_text(f"{bowl_side}_{i}", str(bar))
             except Exception as e:
                 self.logger.error(f"Some error occurred. {e}")
-    
 
     def weigh(self, bars_left: List[int], bars_right: List[int]) -> str:
         """
@@ -74,31 +62,21 @@ class GoldBarWeighing:
 
         try:
             # Click the weigh button, to compare the weights on both side
-            # self.driver.find_element(By.ID, "weigh").click()
             self.webutils.click_button_by_id("weigh")
 
             # Wait for the 'reset' (result) to be enabled with the result text
-            self.webutils.wait_for_element('reset', ['<', '>','='])
+            self.webutils.wait_for_element('reset', ['<', '>', '='])
 
             # Get the text of the element with id = 'reset'
             result = self.webutils.get_text("reset")
             self.reset()  # Reset the bowls
             return result
-
-        # If WebDriverWait times out
-        except TimeoutException:
-            self.logger.error(f"Weighing operation timed out or the result element did not "
-                          f"contain the expected value.")
-            raise
-        except NoSuchElementException:
-            self.logger.error(f"Requested Element not found.")
-            raise
         except Exception as e:
             self.logger.error(f"Some Error occurred. {e}")
             raise
 
-    @staticmethod
-    def find_suspected_bars(left: List[int],
+    def find_suspected_bars(self,
+                            left: List[int],
                             right: List[int],
                             remaining: List[int],
                             result: str) -> List[int]:
@@ -128,7 +106,8 @@ class GoldBarWeighing:
             self.logger.error(f"Some Error occurred: {e}")
             raise
 
-    def valid_bar_values(self, left_bars: List[int], right_bars: List[int], remaining: List[int]) -> bool:
+    @staticmethod
+    def valid_bar_values(left_bars: List[int], right_bars: List[int], remaining: List[int]) -> bool:
 
         """
         Validates the values of the bars. Checks 3 conditions, length of all bars should be 3,
@@ -143,16 +122,15 @@ class GoldBarWeighing:
         bool: Returns if the bar values are valid or not.
         """
 
-        if len(left_bars)!=3 or len(right_bars)!=3 or len(remaining)!=3:
+        if len(left_bars) != 3 or len(right_bars) != 3 or len(remaining) != 3:
             return False
-        
+
         all_bars = left_bars + right_bars + remaining
         if len(set(all_bars)) == 9 and all(0 <= bar <= 8 for bar in all_bars):
             return True
         return False
 
-
-    def find_fake_bar(self, left, right, remaining) -> int:
+    def find_fake_bar(self, left: List[int], right: List[int], remaining: List[int]) -> int:
 
         """
         Find the fake bar by performing a series of weightings.
@@ -165,11 +143,11 @@ class GoldBarWeighing:
         Returns:
         int: The index of the suspected fake bar.
         """
-        
+
         try:
             if not self.valid_bar_values(left, right, remaining):
-                raise ValueError("The values in all the bars are not correct. " 
-                "Enter 3 unique values in each bar from 0-8")
+                raise ValueError("The values in all the bars are not correct. "
+                                 "Enter 3 unique values in each bar from 0-8")
 
             # First weighing
             result = self.weigh(left, right)
@@ -183,7 +161,6 @@ class GoldBarWeighing:
                 [possible_fake_bar[2]],
                 result
             )
-
             return fake_bar[0]
         except Exception as e:
             self.logger.error(f"Some error occurred while finding the fake bar: {e}")
@@ -214,13 +191,10 @@ class GoldBarWeighing:
             self.webutils.accept_alert()
 
             # Check if correct bar found
-            found_bar = True 
+            found_bar = True
             if alert_text != "Yay! You find it!":
                 found_bar = False
             return found_bar
-        except NoSuchElementException:
-            self.logger.error(f"Failed to find the coin button for bar {fake_bar}.")
-            raise
         except Exception as e:
             self.logger.error(f"Some error occurred :{e}")
 
@@ -234,8 +208,5 @@ class GoldBarWeighing:
             print("\nWeightings list: ")
             for item in weighings_list:
                 print(item.text)
-        except NoSuchElementException:
-            self.logger.error("Failed to find weighing list elements")
-            raise
         except Exception as e:
             self.logger.error(f"Some error occurred :{e}")

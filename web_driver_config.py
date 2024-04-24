@@ -1,17 +1,17 @@
 from selenium import webdriver
-from selenium.webdriver.common.by import By 
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.common.exceptions import NoSuchElementException, TimeoutException
-from typing import List
 from selenium.webdriver.chrome.options import Options
-import logging
-import json
-
 
 
 class WebDriver:
 
     def __init__(self, headless=True):
+        """
+        Initializes a WebDriver instance with optional headless mode.
+
+        Args:
+            headless (bool): If True, the browser will be run in headless mode.
+            Defaults to True.
+        """
         options = Options
         if headless:
             options = Options()
