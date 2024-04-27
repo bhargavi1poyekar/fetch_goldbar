@@ -20,7 +20,8 @@ class WebDriver:
             options.add_argument("--headless")
             options.add_argument("--no-sandbox")
             options.add_argument("--disable-dev-shm-usage")
-
-        self.driver = webdriver.Chrome(options=options)
+            self.driver = webdriver.Chrome(options=options)
+        else:
+            self.driver = webdriver.Chrome()
     
     
